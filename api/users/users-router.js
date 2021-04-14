@@ -1,44 +1,133 @@
 const express = require('express');
-
-// You will need `users-model.js` and `posts-model.js` both
-// The middleware functions also need to be required
-
 const router = express.Router();
 
-router.get('/', (req, res) => {
+// You will need `users-model.js` and `posts-model.js` both
+const users = require("./users-model")
+const posts = require("../posts/posts-model");
+const { validateUser, validateUserId } = require('../middleware/middleware');
+
+// The middleware functions also need to be required
+
+
+
+
+router.get('/', (req, res, next) => {
   // RETURN AN ARRAY WITH ALL THE USERS
+  
+  users.get()
+  .then((users) =>{
+    res.status(200).json(users)
+  }
+  )
+  .catch((err)=>{
+    next(err)
+  }
+  )
+  
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id',validateUser() ,validateUserId(), (req, res, next) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
+  // users.getById(req.params.id)
+	// 	.then((user) => {
+	// 		if (user) {
+  //               req.user = user
+  //       res.json(user)
+	// 			next()
+	// 		} else {
+	// 			res.status(404).json({
+	// 				message: "User not found",
+	// 			})
+	// 		}
+	// 	})
+	// 	.catch((error) => {
+	// 		console.log(error)
+	// 		next(error)
+	// 	})
+    res.json(req.user)
 });
 
-router.post('/', (req, res) => {
+router.post('/', validateUser(),(req, res, next) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
+  users.insert(req.body)
+    .then((user)=>{
+      res.status(201).json(user)
+    })
+    .catch((err)=>{
+      next(err)
+    }
+    )
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUser(), validateUserId(),(req, res, next) => {
   // RETURN THE FRESHLY UPDATED USER OBJECT
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  users.update(req.params.id, req.body)
+  .then((user)=>{
+    if(user){
+      res.status(200).json(user)
+    }else{
+      res.status(404).json({
+        message: "Error updating"
+      })
+    }
+  })
+  .catch((err)=>{
+    next(err)
+  })
+
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUser(), validateUserId(), (req, res, next) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
+  users.remove(req.params.id)
+  .then((count)=>{
+    if(count > 0){
+      res.status(200).json({
+        message: "The user has been deleted"
+      })
+    }else{
+      res.status(404).json({
+        message: "The user could not be found"
+      })
+    }
+  })
+  .catch((err)=>{
+    next(err)
+  })
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUser(),validateUserId(),(req, res, next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
+  posts.get()
+  .then((posts)=>{
+    res.status(200).json(posts)
+  })
+  .catch((err)=>{
+    next(err)
+  })
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId(),(req, res, next) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  posts.insert(req.params.id, req.body)
+  .then((post)=>{
+    res.status(201).json(post)
+  })
+  .catch((err)=>{
+    next(err)
+  })
+
+
+  
 });
 
 // do not forget to export the router
+module.exports = router
