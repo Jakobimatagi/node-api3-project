@@ -28,21 +28,23 @@ router.get('/', (req, res, next) => {
 router.get('/:id', (req, res, next) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
-  // users.get(req.params.id)
-  // .then((user) => {
-  //   if (user) {
-  //             req.user = user
-  //     next()
-  //   } else {
-  //     res.status(404).json({
-  //       message: "User not found",
-  //     })
-  //   }
-  // })
-  // .catch((error) => {
-  //   console.log(error)
-  //   next(error)
-  // })
+  users.getById(req.params.id)
+		.then((user) => {
+			if (user) {
+                req.user = user
+        res.json(user)
+				next()
+			} else {
+				res.status(404).json({
+					message: "User not found",
+				})
+			}
+		})
+		.catch((error) => {
+			console.log(error)
+			next(error)
+		})
+    
 });
 
 router.post('/', (req, res, next) => {
@@ -78,6 +80,10 @@ router.post('/:id/posts', (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  
+
+
+  
 });
 
 // do not forget to export the router

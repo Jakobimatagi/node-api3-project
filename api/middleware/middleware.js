@@ -20,38 +20,34 @@ function logger(req, res, next) {
 
 function validateUserId(req, res, next) {
   // DO YOUR MAGIC
-  users.getById(req.params.id)
-  .then((user)=>{
-    if(user){
-      req.user = user
-      next()
-    } else {
-      res.status(404).json({
-        message: "user not found" 
-      })
-    }
-  }
-  )
-  .catch((err)=>{
-    next(err)
-  })
+  // users.getById(req.params.id)
+  // .then((user)=>{
+  //   if(user){
+  //     req.user = user
+  //     next()
+  //   } else {
+  //     res.status(404).json({
+  //       message: "user not found" 
+  //     })
+  //   }
+  // }
+  // )
+  // .catch((err)=>{
+  //   next(err)
+  // })
 }
 
-// function validateUser(req, res, next) {
-//   // DO YOUR MAGIC
-//   if(!req.body.name){
-//     return res.status(400).json({
-//       message: "missing required name field"
-//     })
-//   }
-//   console.log(req.body)
-// }
+function validateUser(req, res, next) {
+  // DO YOUR MAGIC
+  if(!req.body.name){
+    return res.status(400).json({
+      message: "missing required name field"
+    })
+  }
+  next()
+}
 
-// const validateUser = (req, res, next) => {
-//   console.log(validateUser)
 
-//   next()
-// }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
@@ -61,6 +57,6 @@ function validatePost(req, res, next) {
 module.exports = {
   logger,
   validateUserId,
-  // validateUser,
+  validateUser,
   validatePost,
 }
