@@ -5,6 +5,7 @@ const router = express.Router();
 const users = require("./users-model")
 const post = require("../posts/posts-model");
 const { validateUser, validateUserId } = require('../middleware/middleware');
+
 // The middleware functions also need to be required
 
 
@@ -25,29 +26,29 @@ router.get('/', (req, res, next) => {
   
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id',validateUser() ,validateUserId(), (req, res, next) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
-  users.getById(req.params.id)
-		.then((user) => {
-			if (user) {
-                req.user = user
-        res.json(user)
-				next()
-			} else {
-				res.status(404).json({
-					message: "User not found",
-				})
-			}
-		})
-		.catch((error) => {
-			console.log(error)
-			next(error)
-		})
-    
+  // users.getById(req.params.id)
+	// 	.then((user) => {
+	// 		if (user) {
+  //               req.user = user
+  //       res.json(user)
+	// 			next()
+	// 		} else {
+	// 			res.status(404).json({
+	// 				message: "User not found",
+	// 			})
+	// 		}
+	// 	})
+	// 	.catch((error) => {
+	// 		console.log(error)
+	// 		next(error)
+	// 	})
+    res.json(req.user)
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', validateUser(),(req, res, next) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
   users.insert(req.body)
@@ -60,15 +61,44 @@ router.post('/', (req, res, next) => {
     )
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUser(), validateUserId(),(req, res, next) => {
   // RETURN THE FRESHLY UPDATED USER OBJECT
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  users.update(req.params.id, req.body)
+  .then((user)=>{
+    if(user){
+      res.status(200).json(user)
+    }else{
+      res.status(404).json({
+        message: "Error updating"
+      })
+    }
+  })
+  .catch((err)=>{
+    next(err)
+  })
+
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId(), (req, res, next) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
+  users.remove(req.params.id)
+  .then((count)=>{
+    if(count > 0){
+      res.status(200).json({
+        message: "The user has been deleted"
+      })
+    }else{
+      res.status(404).json({
+        message: "The user could not be found"
+      })
+    }
+  })
+  .catch((err)=>{
+    next(err)
+  })
 });
 
 router.get('/:id/posts', (req, res) => {
